@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#4b1bb7" />
+  <title>Ernährungs-Check</title>
+  <style>
+    :root {
+      --bg1: #4b1bb7;
+      --bg2: #7c2cff;
+      --bg3: #10b6c8;
+      --card: rgba(255,255,255,0.96);
+      --text: #1d1238;
+      --muted: #6b6380;
+      --red: #ef3b4a;
+      --blue: #2f80ed;
+      --yellow: #f2c94c;
+      --green: #27ae60;
+      --purple: #8e44ad;
+      --orange: #f2994a;
+      --shadow: 0 18px 45px rgba(24, 12, 64, 0.22);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.18), transparent 25%),
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,0.16), transparent 28%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+      color: var(--text);
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    header {
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: #fff;
+      color: var(--bg2);
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+      transform: rotate(-4deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -1.5px;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.28);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.25); }
+    .btn-dark { background: var(--text); border-color: var(--text); }
+    .btn-dark:hover { background: #120a28; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .game-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      min-height: 285px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 26px 60px rgba(24, 12, 64, 0.32);
+    }
+
+    .game-card::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      right: -60px;
+      top: -70px;
+      background: rgba(124,44,255,0.12);
+    }
+
+    .card-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 22px;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+    }
+
+    .game-card h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      line-height: 1.1;
+    }
+
+    .game-card p {
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.35;
+      margin: 12px 0 18px;
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #f2efff;
+      color: var(--bg1);
+      font-weight: 900;
+      padding: 9px 13px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .start-btn {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 18px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.05rem;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .start-btn:hover { transform: scale(1.02); filter: brightness(1.04); }
+
+    .info-panel {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.92);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .info-panel h3 { margin: 0 0 8px; }
+    .info-panel p { margin: 0; color: var(--muted); line-height: 1.45; font-weight: 600; }
+
+    .game-shell {
+      background: rgba(255,255,255,0.97);
+      border-radius: 32px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .game-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .progress-wrap {
+      flex: 1;
+    }
+
+    .game-title {
+      font-size: 1.35rem;
+      font-weight: 950;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: #e7e2fb;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green), var(--bg3));
+      border-radius: inherit;
+      transition: width 0.25s ease;
+    }
+
+    .meta {
+      text-align: right;
+      font-weight: 900;
+      color: var(--bg1);
+      min-width: 120px;
+    }
+
+    .question-card {
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.2), transparent 22%),
+        linear-gradient(135deg, #36148d, #6328d8);
+      color: #fff;
+      border-radius: 28px;
+      padding: clamp(20px, 4vw, 42px);
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 18px;
+      box-shadow: 0 16px 34px rgba(54, 20, 141, 0.28);
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      font-weight: 900;
+      font-size: 0.86rem;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      font-size: clamp(1.35rem, 3vw, 2.25rem);
+      line-height: 1.16;
+      font-weight: 950;
+      max-width: 930px;
+      white-space: pre-line;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .answer-btn {
+      min-height: 92px;
+      border-radius: 22px;
+      padding: 18px;
+      color: #fff;
+      font-size: 1.08rem;
+      line-height: 1.25;
+      font-weight: 900;
+      text-align: left;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.16);
+      transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .answer-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.04); }
+    .answer-btn:disabled { cursor: default; }
+
+    .answer-letter {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: rgba(255,255,255,0.25);
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+    }
+
+    .answer-btn.correct {
+      outline: 5px solid rgba(39,174,96,0.45);
+      filter: brightness(1.04);
+    }
+
+    .answer-btn.wrong {
+      outline: 5px solid rgba(239,59,74,0.55);
+      opacity: 0.72;
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 18px;
+      border-radius: 22px;
+      padding: 18px;
+      background: #f6f3ff;
+      border: 3px solid #e5dcff;
+    }
+
+    .feedback.show { display: block; }
+    .feedback h3 { margin: 0 0 8px; font-size: 1.25rem; }
+    .feedback p { margin: 0; color: #3d315f; line-height: 1.45; font-weight: 700; }
+
+    .game-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .primary-action, .secondary-action {
+      padding: 14px 20px;
+      border-radius: 18px;
+      font-weight: 950;
+      font-size: 1rem;
+    }
+
+    .primary-action {
+      background: var(--text);
+      color: #fff;
+      min-width: 190px;
+    }
+
+    .secondary-action {
+      background: #efeaff;
+      color: var(--bg1);
+    }
+
+    .result-card {
+      background: var(--card);
+      border-radius: 32px;
+      padding: clamp(22px, 5vw, 46px);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .result-emoji { font-size: 4rem; margin-bottom: 10px; }
+    .result-card h2 { font-size: clamp(2rem, 5vw, 4rem); margin: 0; }
+    .result-card p { color: var(--muted); font-weight: 750; line-height: 1.5; }
+
+    .mini-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 22px 0;
+      text-align: left;
+    }
+
+    .mini-item {
+      background: #f6f3ff;
+      border-radius: 18px;
+      padding: 14px;
+      font-weight: 800;
+      color: #3d315f;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      header { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 640px) {
+      html {
+        min-height: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        min-height: 100dvh;
+        overflow-x: hidden;
+        background-attachment: fixed;
+      }
+
+      .app {
+        width: 100%;
+        padding: 10px 10px calc(24px + env(safe-area-inset-bottom));
+      }
+
+      header {
+        gap: 10px;
+        margin-bottom: 12px;
+        padding: 4px 2px 0;
+      }
+
+      .brand {
+        width: 100%;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        font-size: 22px;
+        box-shadow: 0 8px 18px rgba(24, 12, 64, 0.2);
+      }
+
+      h1 {
+        font-size: clamp(1.65rem, 8vw, 2.35rem);
+        letter-spacing: -0.8px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 10px 10px;
+        font-size: 0.88rem;
+        line-height: 1.15;
+        min-height: 44px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      }
+
+      .dashboard-grid, .answers, .mini-list {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        gap: 12px;
+      }
+
+      .game-card {
+        min-height: auto;
+        padding: 14px;
+        border-radius: 22px;
+        box-shadow: 0 12px 28px rgba(24, 12, 64, 0.18);
+      }
+
+      .game-card::after {
+        width: 130px;
+        height: 130px;
+        right: -52px;
+        top: -58px;
+      }
+
+      .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .game-card h2 {
+        font-size: 1.18rem;
+        line-height: 1.15;
+        padding-right: 24px;
+      }
+
+      .game-card p {
+        font-size: 0.92rem;
+        line-height: 1.3;
+        margin: 8px 0 10px;
+      }
+
+      .score-pill {
+        padding: 7px 10px;
+        font-size: 0.82rem;
+        margin-bottom: 8px;
+      }
+
+      .start-btn {
+        min-height: 48px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 1rem;
+      }
+
+      .info-panel {
+        margin-top: 12px;
+        padding: 14px;
+        border-radius: 20px;
+      }
+
+      .info-panel h3 {
+        font-size: 1rem;
+      }
+
+      .info-panel p {
+        font-size: 0.92rem;
+        line-height: 1.35;
+      }
+
+      .game-shell {
+        min-height: calc(100dvh - 88px);
+        border-radius: 24px;
+        padding: 12px;
+        box-shadow: 0 12px 28px rgba(24, 12, 64, 0.2);
+      }
+
+      .game-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .game-title {
+        font-size: 1.05rem;
+        line-height: 1.15;
+        margin-bottom: 7px;
+      }
+
+      .progress-bar {
+        height: 10px;
+      }
+
+      .meta {
+        text-align: left;
+        min-width: 0;
+        font-size: 0.9rem;
+        line-height: 1.25;
+        color: #4b1bb7;
+      }
+
+      .question-card {
+        min-height: 150px;
+        border-radius: 22px;
+        padding: 18px 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 10px 22px rgba(54, 20, 141, 0.22);
+      }
+
+      .tag {
+        font-size: 0.74rem;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+      }
+
+      .question {
+        font-size: clamp(1.15rem, 5.8vw, 1.55rem);
+        line-height: 1.18;
+        font-weight: 950;
+      }
+
+      .answers {
+        gap: 9px;
+      }
+
+      .answer-btn {
+        min-height: 68px;
+        border-radius: 18px;
+        padding: 13px 14px;
+        gap: 10px;
+        font-size: 0.98rem;
+        line-height: 1.22;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+        touch-action: manipulation;
+      }
+
+      .answer-letter {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+      }
+
+      .answer-btn.correct,
+      .answer-btn.wrong {
+        outline-width: 4px;
+      }
+
+      .feedback {
+        margin-top: 12px;
+        border-radius: 18px;
+        padding: 13px;
+        border-width: 2px;
+      }
+
+      .feedback h3 {
+        font-size: 1.05rem;
+        margin-bottom: 5px;
+      }
+
+      .feedback p {
+        font-size: 0.94rem;
+        line-height: 1.35;
+      }
+
+      .game-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin: 12px -12px -12px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        background: rgba(255,255,255,0.96);
+        border-top: 1px solid rgba(75, 27, 183, 0.12);
+      }
+
+      .primary-action,
+      .secondary-action {
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 0.98rem;
+      }
+
+      .primary-action {
+        min-width: 0;
+        order: 1;
+      }
+
+      .secondary-action {
+        order: 2;
+      }
+
+      .result-card {
+        min-height: calc(100dvh - 88px);
+        border-radius: 24px;
+        padding: 22px 14px;
+      }
+
+      .result-emoji {
+        font-size: 3rem;
+        margin-bottom: 6px;
+      }
+
+      .result-card h2 {
+        font-size: clamp(2rem, 12vw, 3rem);
+      }
+
+      .result-card p {
+        font-size: 0.98rem;
+        line-height: 1.4;
+      }
+
+      .mini-list {
+        gap: 9px;
+        margin: 16px 0;
+      }
+
+      .mini-item {
+        border-radius: 16px;
+        padding: 12px;
+        font-size: 0.92rem;
+        line-height: 1.3;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .question {
+        font-size: 1.08rem;
+      }
+
+      .answer-btn {
+        font-size: 0.92rem;
+        min-height: 64px;
+        padding: 12px;
+      }
+
+      .game-card h2 {
+        font-size: 1.08rem;
+      }
+    }
+
+    @media (hover: none) {
+      .btn:hover,
+      .game-card:hover,
+      .start-btn:hover,
+      .answer-btn:hover:not(:disabled) {
+        transform: none;
+        filter: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">E4</div>
+        <div>
+          <h1>Ernährungs-Check</h1>
+          <p class="subtitle">Vier kurze Lernspiele zur Selbstkontrolle im Stil eines Quiz-Games</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="homeBtn">Übersicht</button>
+        <button class="btn btn-dark" id="resetAllBtn">Alle Resultate löschen</button>
+      </div>
+    </header>
+
+    <section id="dashboard" class="view active">
+      <div class="dashboard-grid" id="gameGrid"></div>
+      <div class="info-panel">
+        <h3>So funktioniert es</h3>
+        <p>Wähle ein Spiel aus. Jede Aufgabe hat vier Antwortmöglichkeiten. Nach jeder Antwort erhältst du sofort Rückmeldung. In der Übersicht siehst du pro Spiel, wie viele Fragen du korrekt beantwortet hast.</p>
+      </div>
+    </section>
+
+    <section id="gameView" class="view">
+      <div class="game-shell">
+        <div class="game-top">
+          <div class="progress-wrap">
+            <div class="game-title" id="gameTitle">Spiel</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+          <div class="meta" id="gameMeta">Frage 1/8<br />0 richtig</div>
+        </div>
+
+        <div class="question-card">
+          <div class="tag" id="questionTag">Aufgabe</div>
+          <div class="question" id="questionText"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="feedback" id="feedbackBox">
+          <h3 id="feedbackTitle"></h3>
+          <p id="feedbackText"></p>
+        </div>
+
+        <div class="game-actions">
+          <button class="secondary-action" id="backBtn">Zur Übersicht</button>
+          <button class="primary-action hidden" id="nextBtn">Nächste Frage</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultView" class="view">
+      <div class="result-card">
+        <div class="result-emoji" id="resultEmoji">🎉</div>
+        <h2 id="resultTitle">Geschafft!</h2>
+        <p id="resultText"></p>
+        <div class="mini-list" id="resultList"></div>
+        <div class="game-actions" style="justify-content:center;">
+          <button class="secondary-action" id="againBtn">Spiel wiederholen</button>
+          <button class="primary-action" id="resultHomeBtn">Zur Übersicht</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "ernaehrungsCheckProgressV1";
+
+    const games = [
+      {
+        id: "energie",
+        title: "Energiebedarf berechnen",
+        short: "Grundumsatz, PAL-Faktor, Gesamtenergiebedarf und kcal-Werte üben.",
+        icon: "⚡",
+        color: "linear-gradient(135deg, #ef3b4a, #f2994a)",
+        tag: "Rechen-Quiz",
+        questions: [
+          {
+            q: "Was beschreibt der Grundumsatz am besten?",
+            options: [
+              "Die Energie, die der Körper in Ruhe für lebenswichtige Funktionen braucht.",
+              "Die Energie, die nur beim Sport verbraucht wird.",
+              "Die Energie, die ausschliesslich für die Verdauung gebraucht wird.",
+              "Die Energie, die in einem Getränk enthalten ist."
+            ],
+            correct: 0,
+            why: "Der Grundumsatz ist der Energiebedarf in Ruhe, zum Beispiel für Atmung, Herzarbeit und Stoffwechsel."
+          },
+          {
+            q: "Ein Grundumsatz beträgt 1500 kcal pro Tag. Der PAL-Faktor ist 1.6. Wie hoch ist der Gesamtenergiebedarf?",
+            options: ["900 kcal", "1500 kcal", "2100 kcal", "2400 kcal"],
+            correct: 3,
+            why: "Gesamtenergiebedarf = Grundumsatz × PAL-Faktor. 1500 × 1.6 = 2400 kcal."
+          },
+          {
+            q: "Welche Aussage zum Leistungsumsatz ist richtig?",
+            options: [
+              "Er beschreibt zusätzliche Energie für Aktivität, Arbeit, Lernen oder Wärmeregulation.",
+              "Er ist immer null, wenn jemand nicht Sport macht.",
+              "Er ersetzt den Grundumsatz vollständig.",
+              "Er beschreibt nur den Energiegehalt von Fett."
+            ],
+            correct: 0,
+            why: "Zusätzlich zum Grundumsatz braucht der Körper Energie für Bewegung, Arbeit, Lernen und Wärmeregulation."
+          },
+          {
+            q: "Welcher Nährstoff liefert pro Gramm am meisten Energie?",
+            options: ["Kohlenhydrate", "Eiweisse", "Fette", "Wasser"],
+            correct: 2,
+            why: "Fette liefern etwa 9 kcal pro Gramm. Kohlenhydrate und Eiweisse liefern ungefähr 4 kcal pro Gramm."
+          },
+          {
+            q: "30 g Fett liefern ungefähr wie viel Energie?",
+            options: ["90 kcal", "120 kcal", "270 kcal", "420 kcal"],
+            correct: 2,
+            why: "Fett liefert etwa 9 kcal pro Gramm. 30 × 9 = 270 kcal."
+          },
+          {
+            q: "50 g Kohlenhydrate liefern ungefähr wie viel Energie?",
+            options: ["50 kcal", "100 kcal", "210 kcal", "450 kcal"],
+            correct: 2,
+            why: "Kohlenhydrate liefern ungefähr 4.2 kcal pro Gramm. 50 × 4.2 = 210 kcal."
+          },
+          {
+            q: "Eine Person hat einen Grundumsatz von 1400 kcal und einen PAL-Faktor von 1.4. Welche Rechnung ist korrekt?",
+            options: [
+              "1400 + 1.4 = 1401.4 kcal",
+              "1400 × 1.4 = 1960 kcal",
+              "1400 ÷ 1.4 = 1000 kcal",
+              "1400 − 1.4 = 1398.6 kcal"
+            ],
+            correct: 1,
+            why: "Der Gesamtenergiebedarf wird mit Grundumsatz × PAL-Faktor berechnet. 1400 × 1.4 = 1960 kcal."
+          },
+          {
+            q: "Warum ist es in der Pflege hilfreich, den Gesamtenergiebedarf zu kennen?",
+            options: [
+              "Damit man einschätzen kann, ob die Ernährung ungefähr zum Bedarf passt.",
+              "Damit man jede Person exakt gleich ernährt.",
+              "Damit man nie mehr Beobachtungen zum Essverhalten machen muss.",
+              "Damit man den BMI nicht mehr berechnen muss."
+            ],
+            correct: 0,
+            why: "Der Gesamtenergiebedarf hilft, Ernährung und Bedarf fachlich einzuschätzen. Beobachtung und Situation bleiben trotzdem wichtig."
+          }
+        ]
+      },
+      {
+        id: "bmi",
+        title: "BMI & Ernährungszustand",
+        short: "BMI berechnen, Werte einordnen und Beobachtungen erkennen.",
+        icon: "📏",
+        color: "linear-gradient(135deg, #2f80ed, #10b6c8)",
+        tag: "Fall-Check",
+        questions: [
+          {
+            q: "Welche Formel berechnet den BMI korrekt?",
+            options: [
+              "Gewicht in kg ÷ Körpergrösse in m²",
+              "Körpergrösse in cm ÷ Gewicht in kg",
+              "Gewicht in kg × Körpergrösse in m",
+              "Alter ÷ Gewicht in kg"
+            ],
+            correct: 0,
+            why: "BMI = Körpergewicht in kg ÷ Körpergrösse in Metern zum Quadrat."
+          },
+          {
+            q: "Nina ist 1.70 m gross und wiegt 79 kg. Welcher BMI ist ungefähr richtig?",
+            options: ["18.2", "21.6", "27.3", "34.5"],
+            correct: 2,
+            why: "79 ÷ (1.70 × 1.70) = 79 ÷ 2.89 = ungefähr 27.3."
+          },
+          {
+            q: "Ein BMI von ungefähr 27.3 passt bei Erwachsenen am ehesten zu welcher Einschätzung?",
+            options: ["Untergewicht", "Normalgewicht", "Übergewicht", "Starkes Untergewicht"],
+            correct: 2,
+            why: "Ein BMI von 27.3 liegt oberhalb des Normalbereichs und passt am ehesten zu Übergewicht."
+          },
+          {
+            q: "Welche Beobachtung ist bei der Einschätzung des Ernährungszustands besonders wichtig?",
+            options: [
+              "Gewichtsverlauf und Essmenge beobachten",
+              "Lieblingsfarbe erfragen",
+              "Handynutzung zählen",
+              "Schuhgrösse messen"
+            ],
+            correct: 0,
+            why: "Für den Ernährungszustand sind zum Beispiel Gewicht, Gewichtsverlauf, Essmenge, Trinkmenge und körperliche Zeichen relevant."
+          },
+          {
+            q: "Herr Keller, 82 Jahre, nimmt in kurzer Zeit ungewollt ab und isst nur wenige Bissen. Was ist die sinnvollste Einschätzung?",
+            options: [
+              "Hinweise auf mögliches Risiko für Mangelernährung",
+              "Sicher ideales Normalgewicht",
+              "Kein pflegerelevantes Thema",
+              "Er braucht sicher kalorienarme Kost"
+            ],
+            correct: 0,
+            why: "Ungewollter Gewichtsverlust und geringe Essmenge sind Warnzeichen für eine mögliche Mangelernährung."
+          },
+          {
+            q: "Welche Aussage zum BMI ist fachlich richtig?",
+            options: [
+              "Der BMI ist ein Hinweis, ersetzt aber nicht Beobachtung und Gesamtbeurteilung.",
+              "Der BMI sagt sicher, welche Kostform eine Person braucht.",
+              "Der BMI misst direkt den Vitaminmangel.",
+              "Der BMI ist unabhängig von Gewicht und Grösse."
+            ],
+            correct: 0,
+            why: "Der BMI ist eine Orientierung. Für die Pflege braucht es zusätzlich Beobachtungen und die individuelle Situation."
+          },
+          {
+            q: "Welche Kombination passt am ehesten zu einer unausgewogenen Ernährung?",
+            options: [
+              "Viele Energydrinks, wenig Bewegung, unregelmässige Mahlzeiten",
+              "Regelmässige Mahlzeiten, Wasser, Gemüse und Bewegung",
+              "Ausreichend trinken und abwechslungsreich essen",
+              "Genug Eiweiss, Gemüse und passende Portionen"
+            ],
+            correct: 0,
+            why: "Viele zuckerhaltige Getränke, unregelmässige Mahlzeiten und wenig Bewegung können auf eine unausgewogene Ernährung hinweisen."
+          },
+          {
+            q: "Eine Patientin wirkt müde, isst wenig, die Kleidung sitzt plötzlich locker. Was ist eine passende pflegerische Reaktion?",
+            options: [
+              "Essmenge, Gewicht und Trinkmenge genauer beobachten und weitergeben.",
+              "Nicht beachten, solange sie nichts sagt.",
+              "Sofort alle Mahlzeiten streichen.",
+              "Nur den BMI berechnen und danach nichts mehr tun."
+            ],
+            correct: 0,
+            why: "Solche Beobachtungen sollen systematisch erfasst und im Team weitergegeben werden."
+          }
+        ]
+      },
+      {
+        id: "kostformen",
+        title: "Kostformen zuordnen",
+        short: "Passende Kostform zur Situation wählen und fachlich begründen.",
+        icon: "🍽️",
+        color: "linear-gradient(135deg, #27ae60, #10b6c8)",
+        tag: "Zuordnung",
+        questions: [
+          {
+            q: "Eine Patientin hat nach einer Operation Mühe mit schwer verdaulichen, fettigen Speisen. Welche Kostform passt am ehesten?",
+            options: ["Leichte Vollkost", "Sehr fettige Normalkost", "Nur Süssigkeiten", "Keine Flüssigkeit"],
+            correct: 0,
+            why: "Leichte Vollkost wird häufig eingesetzt, wenn schwer verdauliche Speisen schlecht vertragen werden."
+          },
+          {
+            q: "Ein Patient hat deutliche Schluckbeschwerden. Welche Kostform kann je nach Abklärung sinnvoll sein?",
+            options: ["Pürierte oder angepasste Kost", "Sehr harte Kost", "Trockene Nüsse ohne Getränk", "Grosse trockene Brotstücke"],
+            correct: 0,
+            why: "Bei Schluckbeschwerden kann eine angepasste Konsistenz wichtig sein. Die genaue Form richtet sich nach Abklärung und Verordnung."
+          },
+          {
+            q: "Eine ältere Patientin nimmt ungewollt ab und isst sehr wenig. Welche Kostform passt am ehesten als Unterstützung?",
+            options: ["Energie- und eiweissreiche Kost", "Kalorienarme Reduktionskost ohne Grund", "Nur Tee", "Portionen weiter verkleinern"],
+            correct: 0,
+            why: "Bei ungewolltem Gewichtsverlust kann energie- und eiweissreiche Kost helfen, den Bedarf besser zu decken."
+          },
+          {
+            q: "Ein Patient kann normal kauen und schlucken und hat keine spezielle Einschränkung. Welche Kostform ist naheliegend?",
+            options: ["Vollkost / Normalkost", "Pürierte Kost", "Nur Trinknahrung", "Ausschliesslich flüssige Kost"],
+            correct: 0,
+            why: "Wenn keine Einschränkungen bestehen, ist Vollkost beziehungsweise Normalkost naheliegend."
+          },
+          {
+            q: "Welche Situation passt am besten zu ballaststoffreicher Kost?",
+            options: [
+              "Eine Person soll die Verdauung unterstützen, zum Beispiel bei träger Verdauung.",
+              "Eine Person darf gar keine Nahrung aufnehmen.",
+              "Eine Person hat akute Schluckprobleme und bekommt trockene Körner.",
+              "Eine Person soll ausschliesslich Energydrinks trinken."
+            ],
+            correct: 0,
+            why: "Ballaststoffe können die Verdauung unterstützen. Dabei sind Verträglichkeit und genügend Flüssigkeit wichtig."
+          },
+          {
+            q: "Welche Antwort zeigt eine gute Begründung für eine Kostform?",
+            options: [
+              "Die Kostform passt, weil sie sich an Beschwerden, Ressourcen und Bedarf der Person orientiert.",
+              "Die Kostform passt, weil sie schön klingt.",
+              "Die Kostform passt, weil alle Patientinnen dasselbe erhalten sollten.",
+              "Die Kostform passt, weil Rechnen dann unnötig ist."
+            ],
+            correct: 0,
+            why: "Kostformen sollen zur Situation, zu Beschwerden, Ressourcen, Risiken und Pflegezielen passen."
+          },
+          {
+            q: "Eine Patientin hat Diabetes mellitus. Welche Aussage ist am sinnvollsten?",
+            options: [
+              "Die Ernährung soll ausgewogen sein und Kohlenhydrate bewusst berücksichtigen.",
+              "Sie darf nie wieder Kohlenhydrate essen.",
+              "Sie soll nur Süssgetränke trinken.",
+              "Die Ernährung spielt keine Rolle."
+            ],
+            correct: 0,
+            why: "Bei Diabetes werden Kohlenhydrate bewusst eingeplant. Ein pauschales komplettes Verbot ist fachlich nicht sinnvoll."
+          },
+          {
+            q: "Welche Kostform passt am ehesten, wenn eine Person vorübergehend nur flüssige Nahrung aufnehmen darf?",
+            options: ["Flüssige Kost", "Rohkost", "Harte Vollkost", "Frittierte Kost"],
+            correct: 0,
+            why: "Wenn nur Flüssiges erlaubt oder möglich ist, passt flüssige Kost. Ursache und Dauer müssen fachlich abgeklärt sein."
+          }
+        ]
+      },
+      {
+        id: "nina",
+        title: "Fall Nina lösen",
+        short: "Ninas Essverhalten einschätzen, Fehler finden und passende Tipps wählen.",
+        icon: "🧃",
+        color: "linear-gradient(135deg, #8e44ad, #ef3b4a)",
+        tag: "Fallspiel",
+        questions: [
+          {
+            q: "Nina trinkt bis zu fünf normale Energydrinks pro Tag. Was ist die wichtigste fachliche Einschätzung?",
+            options: [
+              "Das kann wegen Zucker und Koffein problematisch sein.",
+              "Das ist unproblematisch, weil Getränke nie Energie enthalten.",
+              "Das ersetzt eine ausgewogene Mahlzeit vollständig.",
+              "Das verbessert automatisch den Ernährungszustand."
+            ],
+            correct: 0,
+            why: "Normale Energydrinks können viel Zucker und Koffein enthalten. Mehrere pro Tag sind deshalb kritisch zu betrachten."
+          },
+          {
+            q: "Nina isst morgens ein Gipfeli und trinkt einen Energydrink. In der Pause isst sie nichts. Was kann eine Folge sein?",
+            options: [
+              "Hunger und Konzentrationsprobleme vor dem Mittag",
+              "Garantiert bessere Konzentration",
+              "Sicher kein Einfluss auf den Unterricht",
+              "Automatisch vollständige Nährstoffversorgung"
+            ],
+            correct: 0,
+            why: "Unregelmässiges Essen und zuckerreiche Getränke können Hunger und Konzentrationsschwierigkeiten begünstigen."
+          },
+          {
+            q: "Welche Empfehlung wäre für Nina realistisch und pflegerisch sinnvoll?",
+            options: [
+              "Energydrinks schrittweise reduzieren und Wasser oder ungesüssten Tee einbauen.",
+              "Ab morgen gar nichts mehr trinken.",
+              "Alle Mahlzeiten auslassen.",
+              "Nur noch Chips essen, damit sie satt ist."
+            ],
+            correct: 0,
+            why: "Realistische, schrittweise Veränderungen sind hilfreicher als extreme Verbote."
+          },
+          {
+            q: "Welche Zwischenmahlzeit wäre für Nina in der Schule am sinnvollsten?",
+            options: [
+              "Vollkornbrot mit Käse oder Joghurt mit Früchten",
+              "Zwei weitere Energydrinks",
+              "Nur Paprikachips",
+              "Gar nichts, obwohl sie Hunger hat"
+            ],
+            correct: 0,
+            why: "Eine ausgewogene Zwischenmahlzeit kann Energie liefern und die Konzentration unterstützen."
+          },
+          {
+            q: "Was zeigt bei Nina besonders deutlich einen ungünstigen Lebensstil?",
+            options: [
+              "Viele Energydrinks, wenig Bewegung, Chips am Abend und unregelmässige Mahlzeiten",
+              "Sie isst manchmal am Familientisch",
+              "Sie geht zur Berufsfachschule",
+              "Sie spricht mit ihrer Familie über den Tag"
+            ],
+            correct: 0,
+            why: "Mehrere Gewohnheiten zusammen weisen auf eine unausgewogene Ernährung und wenig Bewegung hin."
+          },
+          {
+            q: "Welche Aussage ist im Beratungsgespräch am besten?",
+            options: [
+              "Wir schauen gemeinsam, was du im Alltag realistisch ändern kannst.",
+              "Du machst alles falsch.",
+              "Du darfst nie wieder etwas essen, das dir schmeckt.",
+              "Das ist mir egal, du musst einfach gehorchen."
+            ],
+            correct: 0,
+            why: "Eine wertschätzende Beratung unterstützt Veränderung eher als Beschämung oder Druck."
+          },
+          {
+            q: "Nina möchte wissen, weshalb der Gesamtenergiebedarf für sie wichtig sein kann. Was ist die beste Antwort?",
+            options: [
+              "Er hilft einzuschätzen, wie viel Energie sie ungefähr braucht und ob ihre Ernährung dazu passt.",
+              "Er sagt ihr exakt, was sie jede Minute essen muss.",
+              "Er ersetzt alle anderen Beobachtungen.",
+              "Er zeigt direkt, welche Musik sie hören sollte."
+            ],
+            correct: 0,
+            why: "Der Wert ist eine Orientierung für Bedarf und Ernährung. Er muss mit Alltag, Beobachtung und Zielen verbunden werden."
+          },
+          {
+            q: "Welche kleine Veränderung passt am besten zu einer ersten alltagstauglichen Zielsetzung?",
+            options: [
+              "An zwei Schultagen eine vorbereitete Zwischenmahlzeit mitnehmen und einen Energydrink durch Wasser ersetzen.",
+              "Sofort jeden Tag Leistungssport machen und nie wieder Snacks essen.",
+              "Nur noch Light-Produkte konsumieren und sonst nichts ändern.",
+              "Den ganzen Tag nichts essen und abends sehr viel essen."
+            ],
+            correct: 0,
+            why: "Eine kleine, konkrete und erreichbare Veränderung ist für den Alltag oft sinnvoller als ein extremes Ziel."
+          }
+        ]
+      }
+    ];
+
+    const answerColors = ["var(--red)", "var(--blue)", "var(--yellow)", "var(--green)"];
+    const answerLetters = ["A", "B", "C", "D"];
+
+    let state = loadProgress();
+    let activeGame = null;
+    let activeIndex = 0;
+    let activeCorrect = 0;
+    let answered = false;
+
+    const dashboard = document.getElementById("dashboard");
+    const gameView = document.getElementById("gameView");
+    const resultView = document.getElementById("resultView");
+    const gameGrid = document.getElementById("gameGrid");
+    const gameTitle = document.getElementById("gameTitle");
+    const questionTag = document.getElementById("questionTag");
+    const questionText = document.getElementById("questionText");
+    const answers = document.getElementById("answers");
+    const feedbackBox = document.getElementById("feedbackBox");
+    const feedbackTitle = document.getElementById("feedbackTitle");
+    const feedbackText = document.getElementById("feedbackText");
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const resetAllBtn = document.getElementById("resetAllBtn");
+    const progressFill = document.getElementById("progressFill");
+    const gameMeta = document.getElementById("gameMeta");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultText = document.getElementById("resultText");
+    const resultList = document.getElementById("resultList");
+    const resultEmoji = document.getElementById("resultEmoji");
+    const againBtn = document.getElementById("againBtn");
+    const resultHomeBtn = document.getElementById("resultHomeBtn");
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function showView(view) {
+      [dashboard, gameView, resultView].forEach(v => v.classList.remove("active"));
+      view.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderDashboard() {
+      gameGrid.innerHTML = "";
+      games.forEach(game => {
+        const progress = state[game.id] || { bestCorrect: 0, answered: 0, completed: false };
+        const card = document.createElement("article");
+        card.className = "game-card";
+        card.innerHTML = `
+          <div>
+            <div class="card-icon" style="background:${game.color}">${game.icon}</div>
+            <h2>${game.title}</h2>
+            <p>${game.short}</p>
+            <div>
+              <span class="score-pill">${progress.bestCorrect || 0}/8 korrekt</span>
+              <span class="score-pill">${progress.answered || 0}/8 beantwortet</span>
+            </div>
+          </div>
+          <button class="start-btn" style="background:${game.color}">${progress.completed ? "Nochmals spielen" : "Spiel starten"}</button>
+        `;
+        card.querySelector("button").addEventListener("click", () => startGame(game.id));
+        gameGrid.appendChild(card);
+      });
+    }
+
+    function startGame(gameId) {
+      activeGame = games.find(g => g.id === gameId);
+      activeIndex = 0;
+      activeCorrect = 0;
+      answered = false;
+      renderQuestion();
+      showView(gameView);
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const q = activeGame.questions[activeIndex];
+      gameTitle.textContent = activeGame.title;
+      questionTag.textContent = `${activeGame.tag} · Frage ${activeIndex + 1} von ${activeGame.questions.length}`;
+      questionText.textContent = q.q;
+      progressFill.style.width = `${(activeIndex / activeGame.questions.length) * 100}%`;
+      gameMeta.innerHTML = `Frage ${activeIndex + 1}/8<br>${activeCorrect} richtig`;
+      feedbackBox.classList.remove("show");
+      nextBtn.classList.add("hidden");
+      answers.innerHTML = "";
+
+      q.options.forEach((option, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "answer-btn";
+        btn.style.background = answerColors[idx];
+        btn.innerHTML = `<span class="answer-letter">${answerLetters[idx]}</span><span>${option}</span>`;
+        btn.addEventListener("click", () => chooseAnswer(idx));
+        answers.appendChild(btn);
+      });
+    }
+
+    function chooseAnswer(selected) {
+      if (answered) return;
+      answered = true;
+      const q = activeGame.questions[activeIndex];
+      const buttons = Array.from(document.querySelectorAll(".answer-btn"));
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) btn.classList.add("correct");
+        if (idx === selected && idx !== q.correct) btn.classList.add("wrong");
+      });
+
+      const isCorrect = selected === q.correct;
+      if (isCorrect) activeCorrect++;
+
+      feedbackTitle.textContent = isCorrect ? "Richtig!" : "Noch nicht ganz.";
+      feedbackText.textContent = q.why;
+      feedbackBox.classList.add("show");
+      nextBtn.textContent = activeIndex === activeGame.questions.length - 1 ? "Auswertung anzeigen" : "Nächste Frage";
+      nextBtn.classList.remove("hidden");
+      gameMeta.innerHTML = `Frage ${activeIndex + 1}/8<br>${activeCorrect} richtig`;
+    }
+
+    function nextQuestion() {
+      if (activeIndex < activeGame.questions.length - 1) {
+        activeIndex++;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+
+    function finishGame() {
+      progressFill.style.width = "100%";
+      const old = state[activeGame.id] || { bestCorrect: 0, answered: 0, completed: false };
+      state[activeGame.id] = {
+        bestCorrect: Math.max(old.bestCorrect || 0, activeCorrect),
+        answered: activeGame.questions.length,
+        completed: true,
+        lastCorrect: activeCorrect,
+        lastPlayed: new Date().toISOString()
+      };
+      saveProgress();
+      renderResult();
+      renderDashboard();
+      showView(resultView);
+    }
+
+    function renderResult() {
+      const total = activeGame.questions.length;
+      const percent = Math.round((activeCorrect / total) * 100);
+      let message = "";
+      let emoji = "🎉";
+
+      if (activeCorrect === total) {
+        message = "Sehr stark. Du hast alle Aufgaben korrekt gelöst.";
+        emoji = "🏆";
+      } else if (activeCorrect >= 6) {
+        message = "Gut gemacht. Die Grundlagen sitzen schon ziemlich gut.";
+        emoji = "🎯";
+      } else if (activeCorrect >= 4) {
+        message = "Solide Grundlage. Wiederhole die falschen Themen nochmals gezielt.";
+        emoji = "💪";
+      } else {
+        message = "Noch unsicher. Starte das Spiel nochmals und lies die Rückmeldungen genau.";
+        emoji = "📚";
+      }
+
+      resultEmoji.textContent = emoji;
+      resultTitle.textContent = `${activeCorrect}/${total} korrekt`;
+      resultText.textContent = `${message} Das entspricht ${percent}%.`;
+
+      const tips = getTipsForGame(activeGame.id);
+      resultList.innerHTML = tips.map(t => `<div class="mini-item">${t}</div>`).join("");
+    }
+
+    function getTipsForGame(gameId) {
+      const map = {
+        energie: [
+          "Merke: Gesamtenergiebedarf = Grundumsatz × PAL-Faktor.",
+          "Fette liefern ca. 9 kcal/g, Kohlenhydrate ca. 4.2 kcal/g, Eiweisse ca. 4 kcal/g.",
+          "Der Grundumsatz beschreibt den Energiebedarf in Ruhe.",
+          "Der Leistungsumsatz hängt mit Aktivität, Arbeit und Alltag zusammen."
+        ],
+        bmi: [
+          "BMI = Gewicht in kg ÷ Körpergrösse in m².",
+          "BMI ist eine Orientierung, ersetzt aber keine Beobachtung.",
+          "Ungewollter Gewichtsverlust ist pflegerelevant.",
+          "Essmenge, Trinkmenge und Gewichtsverlauf sind wichtige Beobachtungen."
+        ],
+        kostformen: [
+          "Kostformen müssen zur Situation und zu den Beschwerden passen.",
+          "Bei Schluckbeschwerden kann eine angepasste Konsistenz nötig sein.",
+          "Bei Gewichtsverlust kann energie- und eiweissreiche Kost helfen.",
+          "Eine Begründung ist wichtiger als nur der Name der Kostform."
+        ],
+        nina: [
+          "Bei Nina sind Energydrinks, unregelmässiges Essen und wenig Bewegung zentral.",
+          "Beratung soll wertschätzend und realistisch sein.",
+          "Kleine erreichbare Ziele sind besser als extreme Verbote.",
+          "Eine Zwischenmahlzeit kann Konzentration und Sättigung unterstützen."
+        ]
+      };
+      return map[gameId] || [];
+    }
+
+    function goHome() {
+      renderDashboard();
+      showView(dashboard);
+    }
+
+    function resetAll() {
+      const confirmed = confirm("Möchtest du wirklich alle gespeicherten Resultate löschen?");
+      if (!confirmed) return;
+      state = {};
+      saveProgress();
+      renderDashboard();
+      showView(dashboard);
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    backBtn.addEventListener("click", goHome);
+    homeBtn.addEventListener("click", goHome);
+    resultHomeBtn.addEventListener("click", goHome);
+    resetAllBtn.addEventListener("click", resetAll);
+    againBtn.addEventListener("click", () => startGame(activeGame.id));
+
+    renderDashboard();
+  </script>
+</body>
+</html>
