@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMI-Textaufgaben</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --primary: #3b5bbb;
+      --primary-dark: #2f4893;
+      --good: #15803d;
+      --bad: #b91c1c;
+      --warn: #b45309;
+      --line: #dbe3ef;
+      --soft-blue: #e8eef9;
+      --soft-purple: #f1ecff;
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #e4edff, var(--bg) 45%, #ffffff 100%);
+      color: var(--ink);
+      padding: 18px;
+    }
+
+    .app {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #304aa0, #6f86df);
+      color: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 16px 35px rgba(47, 72, 147, 0.22);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      line-height: 1.05;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.02rem;
+      opacity: 0.95;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(219, 227, 239, 0.9);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--soft-blue);
+      color: #253b7c;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .score {
+      font-weight: 800;
+      color: #253b7c;
+    }
+
+    .question {
+      font-size: clamp(1.18rem, 3.4vw, 1.55rem);
+      line-height: 1.42;
+      font-weight: 750;
+      margin: 12px 0 18px;
+    }
+
+    .formula {
+      background: #f8fafc;
+      border: 1px dashed #bac8dd;
+      border-radius: 16px;
+      padding: 12px 14px;
+      color: #334155;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 15px 16px;
+      font-size: 1.25rem;
+      outline: none;
+      background: white;
+      transition: 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(59, 91, 187, 0.12);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+      margin-bottom: 18px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .option {
+      border: 2px solid var(--line);
+      background: white;
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.15s;
+      min-height: 62px;
+    }
+
+    .option:hover {
+      transform: translateY(-1px);
+      border-color: #a7b6d2;
+    }
+
+    .option.selected {
+      border-color: var(--primary);
+      background: var(--soft-purple);
+      box-shadow: 0 0 0 4px rgba(59, 91, 187, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button.primary,
+    button.secondary {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 850;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    button.primary:hover { background: var(--primary-dark); }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    button.secondary:hover { background: #cbd5e1; }
+
+    .feedback {
+      display: none;
+      margin-top: 18px;
+      border-radius: 18px;
+      padding: 16px;
+      line-height: 1.45;
+      border: 2px solid transparent;
+    }
+
+    .feedback.good {
+      display: block;
+      background: #ecfdf5;
+      border-color: #86efac;
+      color: #14532d;
+    }
+
+    .feedback.bad {
+      display: block;
+      background: #fff1f2;
+      border-color: #fca5a5;
+      color: #7f1d1d;
+    }
+
+    .feedback.neutral {
+      display: block;
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #78350f;
+    }
+
+    .feedback strong { display: block; margin-bottom: 5px; }
+
+    .progressbar {
+      height: 14px;
+      border-radius: 999px;
+      background: #dbe3ef;
+      overflow: hidden;
+      margin: 16px 0 10px;
+    }
+
+    .progressbar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b5bbb, #7ea4ff);
+      transition: width 0.25s;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .result-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .result-screen h2 {
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
+      margin-bottom: 8px;
+      color: #253b7c;
+    }
+
+    .big-score {
+      font-size: clamp(2.5rem, 10vw, 5rem);
+      font-weight: 950;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+
+    .history {
+      margin-top: 16px;
+      max-height: 320px;
+      overflow: auto;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .history-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: white;
+    }
+
+    .history-item:last-child { border-bottom: 0; }
+    .ok { color: var(--good); font-weight: 800; }
+    .no { color: var(--bad); font-weight: 800; }
+
+    @media (max-width: 780px) {
+      body { padding: 10px; }
+      .grid { grid-template-columns: 1fr; }
+      .card, header { padding: 18px; }
+      .options { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      button.primary, button.secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>BMI-Textaufgaben</h1>
+      <p>Berechne den BMI und wähle den passenden Ernährungszustand aus.</p>
+    </header>
+
+    <section class="grid" id="gameScreen">
+      <div class="card">
+        <div class="topline">
+          <span class="badge" id="taskNumber">Aufgabe 1 / 20</span>
+          <span class="score" id="scoreText">Punkte: 0</span>
+        </div>
+
+        <div class="progressbar" aria-hidden="true"><div id="progressFill"></div></div>
+
+        <p class="question" id="questionText"></p>
+
+        <div class="formula">
+          <b>Formel:</b> BMI = Körpergewicht (kg) : Körpergrösse (m) : Körpergrösse (m)
+        </div>
+
+        <label for="bmiInput">Dein berechneter BMI</label>
+        <input id="bmiInput" type="text" inputmode="decimal" autocomplete="off" placeholder="z.B. 24,3" />
+        <div class="hint">Du darfst Komma oder Punkt verwenden. Runde auf eine Stelle nach dem Komma.</div>
+
+        <label>Ernährungszustand auswählen</label>
+        <div class="options" id="options"></div>
+
+        <div class="actions">
+          <button class="primary" id="checkBtn">Antwort prüfen</button>
+          <button class="secondary" id="nextBtn" style="display:none;">Nächste Aufgabe</button>
+          <button class="secondary" id="restartBtn">Neu starten</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </section>
+
+    <section class="card result-screen" id="resultScreen">
+      <h2>Auswertung</h2>
+      <p>Du hast die Übung abgeschlossen.</p>
+      <div class="big-score" id="finalScore"></div>
+      <p id="finalText"></p>
+      <button class="primary" id="restartBtn2">Nochmals üben</button>
+      <div class="history" id="history"></div>
+    </section>
+  </main>
+
+  <script>
+    const tasks = [
+      { name: "Herr Meier", height: 1.80, weight: 82, text: "Herr Meier ist 1,80 m gross und wiegt 82 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Frau Keller", height: 1.65, weight: 58, text: "Frau Keller ist 1,65 m gross und wiegt 58 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Luca", height: 1.75, weight: 70, text: "Luca ist 1,75 m gross und wiegt 70 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Frau Berger", height: 1.58, weight: 72, text: "Frau Berger ist 1,58 m gross und wiegt 72 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Herr Frei", height: 1.90, weight: 105, text: "Herr Frei ist 1,90 m gross und wiegt 105 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Sofia", height: 1.62, weight: 50, text: "Sofia ist 1,62 m gross und wiegt 50 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Patientin", height: 1.70, weight: 85, text: "Eine Patientin ist 1,70 m gross und wiegt 85 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Patient", height: 1.68, weight: 54, text: "Ein Patient ist 1,68 m gross und wiegt 54 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Mara", height: 1.55, weight: 60, text: "Mara ist 1,55 m gross und wiegt 60 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Herr Schmid", height: 1.82, weight: 95, text: "Herr Schmid ist 1,82 m gross und wiegt 95 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Frau Huber", height: 1.73, weight: 66, text: "Frau Huber ist 1,73 m gross und wiegt 66 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Jonas", height: 1.78, weight: 63, text: "Jonas ist 1,78 m gross und wiegt 63 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Bewohnerin", height: 1.60, weight: 80, text: "Eine Bewohnerin ist 1,60 m gross und wiegt 80 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Patient", height: 1.85, weight: 76, text: "Ein Patient ist 1,85 m gross und wiegt 76 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Frau Baumann", height: 1.57, weight: 48, text: "Frau Baumann ist 1,57 m gross und wiegt 48 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Herr Graf", height: 1.69, weight: 89, text: "Herr Graf ist 1,69 m gross und wiegt 89 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Nina", height: 1.71, weight: 57, text: "Nina ist 1,71 m gross und wiegt 57 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Patient nach Operation", height: 1.76, weight: 92, text: "Ein Patient nach einer Operation ist 1,76 m gross und wiegt 92 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Frau Steiner", height: 1.64, weight: 69, text: "Frau Steiner ist 1,64 m gross und wiegt 69 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." },
+      { name: "Herr Aliu", height: 1.88, weight: 78, text: "Herr Aliu ist 1,88 m gross und wiegt 78 kg. Berechnen Sie den BMI und bestimmen Sie den Ernährungszustand." }
+    ];
+
+    const categories = [
+      { label: "Untergewicht" },
+      { label: "Normalgewicht" },
+      { label: "Präadipositas" },
+      { label: "Adipositas" }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let selectedCategory = null;
+    let answered = false;
+    let history = [];
+
+    const questionText = document.getElementById("questionText");
+    const taskNumber = document.getElementById("taskNumber");
+    const scoreText = document.getElementById("scoreText");
+    const progressFill = document.getElementById("progressFill");
+    const bmiInput = document.getElementById("bmiInput");
+    const options = document.getElementById("options");
+    const checkBtn = document.getElementById("checkBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const restartBtn2 = document.getElementById("restartBtn2");
+    const feedback = document.getElementById("feedback");
+    const gameScreen = document.getElementById("gameScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const finalScore = document.getElementById("finalScore");
+    const finalText = document.getElementById("finalText");
+    const historyBox = document.getElementById("history");
+
+    function bmi(task) {
+      return task.weight / (task.height * task.height);
+    }
+
+    function roundOne(number) {
+      return Math.round(number * 10) / 10;
+    }
+
+    function formatNumber(number) {
+      return number.toFixed(1).replace(".", ",");
+    }
+
+    function getCategory(value) {
+      if (value < 18.5) return "Untergewicht";
+      if (value < 25) return "Normalgewicht";
+      if (value < 30) return "Präadipositas";
+      return "Adipositas";
+    }
+
+    function parseInput(value) {
+      const cleaned = value.trim().replace(",", ".");
+      const number = Number(cleaned);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function renderOptions() {
+      options.innerHTML = "";
+      categories.forEach(cat => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option" + (selectedCategory === cat.label ? " selected" : "");
+        button.textContent = cat.label;
+        button.addEventListener("click", () => {
+          if (answered) return;
+          selectedCategory = cat.label;
+          renderOptions();
+        });
+        options.appendChild(button);
+      });
+    }
+
+    function renderTask() {
+      const task = tasks[current];
+      selectedCategory = null;
+      answered = false;
+      bmiInput.value = "";
+      bmiInput.disabled = false;
+      checkBtn.style.display = "inline-block";
+      nextBtn.style.display = "none";
+      feedback.className = "feedback";
+      feedback.innerHTML = "";
+      questionText.textContent = task.text;
+      taskNumber.textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+      scoreText.textContent = `Punkte: ${score}`;
+      progressFill.style.width = `${(current / tasks.length) * 100}%`;
+      renderOptions();
+      setTimeout(() => bmiInput.focus(), 80);
+    }
+
+    function checkAnswer() {
+      if (answered) return;
+
+      const task = tasks[current];
+      const correctBmi = roundOne(bmi(task));
+      const correctCategory = getCategory(correctBmi);
+      const userBmi = parseInput(bmiInput.value);
+
+      if (userBmi === null || selectedCategory === null) {
+        feedback.className = "feedback neutral";
+        feedback.innerHTML = "<strong>Noch nicht vollständig.</strong>Bitte trage einen BMI ein und wähle einen Ernährungszustand aus.";
+        return;
+      }
+
+      const bmiCorrect = Math.abs(userBmi - correctBmi) <= 0.05;
+      const categoryCorrect = selectedCategory === correctCategory;
+      const fullyCorrect = bmiCorrect && categoryCorrect;
+
+      if (fullyCorrect) score++;
+
+      answered = true;
+      bmiInput.disabled = true;
+      checkBtn.style.display = "none";
+      nextBtn.style.display = "inline-block";
+      scoreText.textContent = `Punkte: ${score}`;
+      renderOptions();
+
+      const calculation = `${task.weight} : ${task.height.toFixed(2).replace(".", ",")} : ${task.height.toFixed(2).replace(".", ",")} = ${formatNumber(correctBmi)}`;
+      history.push({
+        task: current + 1,
+        text: task.text,
+        userBmi,
+        selectedCategory,
+        correctBmi,
+        correctCategory,
+        fullyCorrect,
+        bmiCorrect,
+        categoryCorrect
+      });
+
+      if (fullyCorrect) {
+        feedback.className = "feedback good";
+        feedback.innerHTML = `
+          <strong>Richtig!</strong>
+          BMI: ${formatNumber(correctBmi)}<br>
+          Ernährungszustand: ${correctCategory}<br>
+          Rechnung: ${calculation}
+        `;
+      } else {
+        feedback.className = "feedback bad";
+        feedback.innerHTML = `
+          <strong>Noch nicht ganz.</strong>
+          Deine Eingabe: BMI ${String(bmiInput.value).replace(".", ",")} / ${selectedCategory}<br>
+          Korrektur: BMI ${formatNumber(correctBmi)} / ${correctCategory}<br>
+          Rechnung: ${calculation}
+        `;
+      }
+    }
+
+    function nextTask() {
+      current++;
+      if (current >= tasks.length) {
+        showResults();
+      } else {
+        renderTask();
+      }
+    }
+
+    function showResults() {
+      gameScreen.style.display = "none";
+      resultScreen.style.display = "block";
+      progressFill.style.width = "100%";
+      finalScore.textContent = `${score} / ${tasks.length}`;
+
+      if (score >= 18) finalText.textContent = "Sehr stark! Du kannst BMI und Ernährungszustand sicher bestimmen.";
+      else if (score >= 14) finalText.textContent = "Gut gemacht. Einzelne Rechnungen oder Kategorien kannst du noch üben.";
+      else if (score >= 10) finalText.textContent = "Solide Grundlage. Wiederhole vor allem die Zuordnung der Ernährungszustände.";
+      else finalText.textContent = "Übe nochmals Schritt für Schritt: Grösse × Grösse, dann Gewicht durch dieses Ergebnis teilen.";
+
+      historyBox.innerHTML = history.map(item => `
+        <div class="history-item">
+          <b>Aufgabe ${item.task}</b> — ${item.fullyCorrect ? '<span class="ok">richtig</span>' : '<span class="no">korrigiert</span>'}<br>
+          <span class="mini">Richtig: BMI ${formatNumber(item.correctBmi)} / ${item.correctCategory}</span><br>
+          <span class="mini">Deine Antwort: BMI ${String(item.userBmi).replace(".", ",")} / ${item.selectedCategory}</span>
+        </div>
+      `).join("");
+    }
+
+    function restart() {
+      current = 0;
+      score = 0;
+      selectedCategory = null;
+      answered = false;
+      history = [];
+      gameScreen.style.display = "grid";
+      resultScreen.style.display = "none";
+      renderTask();
+    }
+
+    checkBtn.addEventListener("click", checkAnswer);
+    nextBtn.addEventListener("click", nextTask);
+    restartBtn.addEventListener("click", restart);
+    restartBtn2.addEventListener("click", restart);
+
+    bmiInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        if (!answered) checkAnswer();
+        else nextTask();
+      }
+    });
+
+    renderTask();
+  </script>
+</body>
+</html>
